@@ -282,6 +282,9 @@ class Main():
         self.obstaclelist = 0
         self.stationlist = 0
         ##
+	#Variable für Doppelsender
+	self.linksrechts = 0
+	#
         self.positionslist = [[self.rawPos[0],self.rawPos[1],self.rawPos[2]]]
         ##
         self.builder = Gtk.Builder() #Lade GUI aus glade Datei

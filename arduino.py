@@ -29,19 +29,13 @@ class Arduino(threading.Thread):
     self.main = main
     self.s = serial.Serial(self.main.ttyport, 115200, 8, 'N', 1, 0.0001)#0.005
     self.s.flush()
-    #self.pattern = re.compile(b"deltat from (\d+) - (\d+) - (\d+\.\d+)") seit Version 0.7 veraltet
     # RegEx für Laufzeitmessungsdaten TODO: allgemeiner formulieren und speziellere Auswertung in recv_packet
     self.pattern = re.compile(b"t([0-9]{2})([0-9]{10})")
     self.run_ = True
     self.strbuffer = b''
   #Dauerschleife, Beendet falls self.run_ == False; siehe threading-doku
   def run(self):
-    #i = 0  
-    #debug ("Arduino start running")
     while(self.run_):
-      #i=i+1
-      #debug("Arduino run:",i)
-      #debug (self.s.inWaiting())
       while (self.s.inWaiting() > 0):#if beim Alex
         self.recv_packet()
       time.sleep(0.00005) # vorher 0.0005 je nach dem wie viele Pakete verschickt werden
@@ -61,13 +55,9 @@ class Arduino(threading.Thread):
   #empfängt und verarbeitet Daten vom Arduino, löst eventhandler.onNewPos aus
   def recv_packet(self):
     while (self.s.inWaiting() > 0):
-      #res = self.s.readline(14)
-      #res = self.s.read(self.s.inWaiting())
       self.strbuffer = self.strbuffer + self.s.read(self.s.inWaiting())
       if b'sync' in self.strbuffer:
-        #debug('Buffer: '+str(self.strbuffer))
         blocks = self.strbuffer.split(b'sync')
-        #debug('Bloecke: '+ str(blocks))
         self.strbuffer = blocks[-1]
         lines = blocks[-2].split(b'\n')#blocks.split(b'\n')
         ##
@@ -75,35 +65,34 @@ class Arduino(threading.Thread):
         ##
         for line in lines:
           tmp = self.pattern.search(line)
-          #debug('Line: '+ str(line))
           if tmp is not None:
-            deltat = float(tmp.group(2))
-            distance = deltat * 0.345 #TODO: Temperaturanpassung, aktuell: 22°C
-            if distance > 1:
-                stationnr = int(tmp.group(1))
-                millis = int(round(time.time() * 1000))
-                #debug(distance)
-                #debug('Stationnr'+str(self.main.stations[stationnr][3]))
-                #Abfrage filtert Fehler durch Reflektionen; muss umso größer sein umso schneller der Zeppelin fliegt!!
-                if ((abs(distance - self.main.stations[stationnr][3]) < 800) or  (self.main.stations[stationnr][3] == 0)):
-                  self.main.stations[stationnr][3] = distance
-                  self.main.stations[stationnr][4] = millis
-                  ##
-                  newdeltat = True
-                  #self.main.clib_multilat()
-                  #pylib_multilat(self.main)
-                  #self.main.eventhandler.onNewPos()
-                  #debug("NewPos")
-                  ##
+            #Nummern 1-20 zeigen Nachricht von Bodenstationen an
+            if int(tmp.group(1)) < 20:
+              deltat = float(tmp.group(2))
+              distance = deltat * 0.345 #TODO: Temperaturanpassung, aktuell: 22°C
+              if distance > 1:
+                  stationnr = int(tmp.group(1))
+                  millis = int(round(time.time() * 1000))
+                  #Abfrage filtert Fehler durch Reflektionen; muss umso größer sein umso schneller der Zeppelin fliegt!!
+                  if ((abs(distance - self.main.stations[stationnr][3]) < 800) or  (self.main.stations[stationnr][3] == 0)):
+                    self.main.stations[stationnr][3] = distance
+                    self.main.stations[stationnr][4] = millis
+                    ##
+                    newdeltat = True
+                    ##
+            else:
+              #Doppel-IPS: Gondel gibt an ob rechts oder links gesendet wurde
+              if int(tmp.group(1)) == 30:
+                self.main.linksrechts = 1
+              if int(tmp.group(1)) == 31:
+                self.main.linksrechts = 0
           else:
-            #debug (res)
             pass
         ##    
         if newdeltat:
           self.main.clib_multilat()
           self.main.eventhandler.onNewPos()
-          #debug("NewPos")
-        ##
+          
         
   def recv_packet_alt(self):
     #self.ttylock.acquire() #vor jedem Zugriff aus die serialle Verbindung lock setzen
