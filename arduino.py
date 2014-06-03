@@ -81,20 +81,23 @@ class Arduino(threading.Thread):
             distance = deltat * 0.345 #TODO: Temperaturanpassung, aktuell: 22°C
             if distance > 1:
                 stationnr = int(tmp.group(1))
-                millis = int(round(time.time() * 1000))
-                #debug(distance)
-                #debug('Stationnr'+str(self.main.stations[stationnr][3]))
-                #Abfrage filtert Fehler durch Reflektionen; muss umso größer sein umso schneller der Zeppelin fliegt!!
-                if ((abs(distance - self.main.stations[stationnr][3]) < 800) or  (self.main.stations[stationnr][3] == 0)):
-                  self.main.stations[stationnr][3] = distance
-                  self.main.stations[stationnr][4] = millis
-                  ##
-                  newdeltat = True
-                  #self.main.clib_multilat()
-                  #pylib_multilat(self.main)
-                  #self.main.eventhandler.onNewPos()
-                  #debug("NewPos")
-                  ##
+                if stationnr < 20:
+                  millis = int(round(time.time() * 1000))
+                  #debug(distance)
+                  #debug('Stationnr'+str(self.main.stations[stationnr][3]))
+                  #Abfrage filtert Fehler durch Reflektionen; muss umso größer sein umso schneller der Zeppelin fliegt!!
+                  if ((abs(distance - self.main.stations[stationnr][3]) < 800) or  (self.main.stations[stationnr][3] == 0)):
+                    self.main.stations[stationnr][3] = distance
+                    self.main.stations[stationnr][4] = millis
+                    ##
+                    newdeltat = True
+                    #self.main.clib_multilat()
+                    #pylib_multilat(self.main)
+                    #self.main.eventhandler.onNewPos()
+                    #debug("NewPos")
+                    ##
+                if stationnr == 30:
+                  self.main.doppel = int(tmp.group(2))
           else:
             #debug (res)
             pass
@@ -103,8 +106,7 @@ class Arduino(threading.Thread):
           self.main.clib_multilat()
           self.main.eventhandler.onNewPos()
           #debug("NewPos")
-        ##
-        
+        ##   
   def recv_packet_alt(self):
     #self.ttylock.acquire() #vor jedem Zugriff aus die serialle Verbindung lock setzen
     while (self.s.inWaiting() > 0):
