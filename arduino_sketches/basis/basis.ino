@@ -1,4 +1,4 @@
-//Base station v0.9.1 20130704 1300
+//Base station v0.9.1  20130704 1300
 #define VERSION "v0.9"
 #define DEVICEID 0
 
@@ -173,7 +173,7 @@ byte parseMsg() {
           newPacket(from, (byte)192, pid);
           }
           break;
-        case 64: {//data to PC, deltat
+        case 64: {//deltat
           unsigned long deltat;
           deltat = (unsigned long)data[8];
           deltat += (unsigned long)data[7]<<8;
@@ -199,9 +199,10 @@ byte parseMsg() {
           pid[0] = data[3];
           pid[1] = data[4];
           
+          
           newPacket(from, (byte)192, pid);
           }
-          break;	  
+          break;
         default:
           return 0; //kenne Datentyp nicht
       }
@@ -219,7 +220,7 @@ byte parseMsg() {
 
 // Prüft ob PID neu oder bereits empfangen wurde.
 // Rückgabewert 0, falls bereits empfangen
-// 1, falls neue PID
+//              1, falls neue PID
 byte isNewPid(byte from, unsigned int pid) {
   unsigned int minpid = 65535;
   byte minpidi =0;

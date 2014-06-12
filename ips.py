@@ -55,6 +55,7 @@ import re
 import cairo
 ##
 import TeamX
+import TeamFlyingCircus
 import gui
 import arduino
 import eventhandler
@@ -124,8 +125,8 @@ class Init():
         #button = Gtk.RadioButton(group=button1, label="Team1")
         #button.connect("toggled", self.setteam, "Team1")
         #self.teambox.pack_start(button, True, True, 0)
-        button = Gtk.RadioButton(group=button1, label="Team2")
-        button.connect("toggled", self.setteam, "Team2")
+        button = Gtk.RadioButton(group=button1, label="TeamFlyingCircus")
+        button.connect("toggled", self.setteam, "TeamFlyingCircus")
         self.teambox.pack_start(button, True, True, 0)
         button = Gtk.RadioButton(group=button1, label="Team3")
         button.connect("toggled", self.setteam, "Team3")
@@ -211,30 +212,30 @@ class Main():
         self.stations[1][0] = 0#1500#0
         self.stations[1][1] = 3000#3000#0
         self.stations[1][2] = 0#0#500#
-        self.stations[2][0] = 1000
+        self.stations[2][0] = 2000
         self.stations[2][1] = 0
-        self.stations[2][2] = 0
+        self.stations[2][2] = 500
         self.stations[3][0] = 2000#1000
         self.stations[3][1] = 6000#3000#1000
         self.stations[3][2] = 0#0#1000
-        self.stations[4][0] = 3000#6000#0#0
-        self.stations[4][1] = 3000#3000#1000
-        self.stations[4][2] = 1000#500#0
+        self.stations[4][0] = 2000#6000#0#0
+        self.stations[4][1] = 2000#3000#1000
+        self.stations[4][2] = 500#500#0
         self.stations[5][0] = 0#450#0#-1000
         self.stations[5][1] = 0#2000#1000
         self.stations[5][2] = 0#0#500#1000
         self.stations[6][0] = 1500#2000 #-1000
         self.stations[6][1] = 0#2000#0
         self.stations[6][2] = 0#0
-        self.stations[7][0] = 1000#-1000
-        self.stations[7][1] = 3000#-1000
-        self.stations[7][2] = 0#1000
+        self.stations[7][0] = 0#-1000
+        self.stations[7][1] = 2000#-1000
+        self.stations[7][2] = 500#1000
         self.stations[8][0] = 3000#2000#1000#0
         self.stations[8][1] = 0#6000#0#1000#-1000
         self.stations[8][2] = 0#0
-        self.stations[9][0] = 1500#3000#1000#1000
-        self.stations[9][1] = 1500#3000#1000#-1000
-        self.stations[9][2] = 0#450#1000
+        self.stations[9][0] = 0#3000#1000#1000
+        self.stations[9][1] = 0#3000#1000#-1000
+        self.stations[9][2] = 500#450#1000
         self.stations[10][0] = 0
         self.stations[10][1] = 0
         self.stations[10][2] = 0
@@ -281,10 +282,9 @@ class Main():
         self.waypointlist = 0
         self.obstaclelist = 0
         self.stationlist = 0
-        ##
-	#Variable für Doppelsender
-	self.linksrechts = 0
-	#
+	##Doppel-IPS        
+        self.doppel = 0
+	##
         self.positionslist = [[self.rawPos[0],self.rawPos[1],self.rawPos[2]]]
         ##
         self.builder = Gtk.Builder() #Lade GUI aus glade Datei
@@ -297,8 +297,8 @@ class Main():
             self.team = TeamX.TeamX(self)
           if self.team == "TeamBlowfish":
             self.team = blowfish.Blowfish(self)
-          if self.team == "Team2":
-            self.team = Team2(self)
+          if self.team == "TeamFlyingCircus":
+            self.team = TeamFlyingCircus.TeamFlyingCircus(self)
           if self.team == "Team3":
             self.team = Team3(self)
         else:
