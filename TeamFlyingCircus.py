@@ -48,9 +48,14 @@ class TeamFlyingCircus(threading.Thread):
         buffer0 = self.main.rawPos[0]
         buffer1 = self.main.rawPos[1]
         buffer2 = self.main.rawPos[2]
+<<<<<<< HEAD
         self.main.doppel = self.main.doppel + 1
         send1 = b' '
         if (self.main.doppel%2==0):
+=======
+        z = z + 1
+        if (z%2==0):
+>>>>>>> 64bab2dcdc569cc0ad7694dfe5e86451534fb98c
           self.main.filterdPos[0] = (buffer0 + self.main.rawPos[0])/2
           self.main.filterdPos[1] = (buffer1 + self.main.rawPos[1])/2
           self.main.filterdPos[2] = (buffer2 + self.main.rawPos[2])/2
@@ -72,7 +77,11 @@ class TeamFlyingCircus(threading.Thread):
           print(local_y)
           send1 = struct.pack(h, local_x, local_y)
           
+<<<<<<< HEAD
         self.main.arduino.send(string(send1))
+=======
+        self.main.arduino.send(send1)
+>>>>>>> 64bab2dcdc569cc0ad7694dfe5e86451534fb98c
         pass
     def onButtonPressed(self, i):
         #welcher Button welche Nummer hat seht Ihr in der glade Datei oder im Eventhandler oder durch Testen
