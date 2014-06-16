@@ -24,12 +24,17 @@ class TeamFlyingCircus(threading.Thread):
         self.run_ = True
         self.start_ = 0
         self.currentWP = 0
+        self.buffer0 = 0
+        self.buffer1 = 0
+        self.buffer2 = 0
         self.local_x = 0
         self.local_y = 0
         self.raw_local_x = 0
         self.raw_local_y = 0
-        self.bufferlist_x = [0, 0, 0, 0, 0, 0]
-        self.bufferlist_y = [0, 0, 0, 0, 0, 0]
+        self.bufferlist_1_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.bufferlist_1_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.bufferlist_2_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.bufferlist_2_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.buffercount = 0
         #threading.Thread.__init__(self) #p-initialisierung der vererbten Fähigkeit threading der Klasse Thread.
         #self.ttylock = threading.Lock()
@@ -59,22 +64,33 @@ class TeamFlyingCircus(threading.Thread):
         pass
     def onNewPos(self):
         print("yahoooooooooooo")
-        buffer0 = self.main.rawPos[0]
-        buffer1 = self.main.rawPos[1]
-        buffer2 = self.main.rawPos[2]
         self.main.doppel = self.main.doppel + 1
         send1 = " "
         self.raw_local_x = 0
         self.raw_local_y = 0
         
-        if (self.main.doppel%2==0):
+        if (self.main.doppel%2==0 and (buffer2 + self.main.rawPos[2])/2 > 200):
+          #filter over 20
+          self.bufferlist_1_x[self.buffercount] = self.buffer0
+          self.bufferlist_1_y[self.buffercount] = self.buffer1
+          self.bufferlist_2_x[self.buffercount] = self.main.rawPos[0]
+          self.bufferlist_2_y[self.buffercount] = self.main.rawPos[1]
+          self.buffercount = self.buffercount + 1
+          if(self.buffercount > 19):
+            self.buffercount = 0
+
+          filterd_1_x = sum(self.bufferlist_1_x)/20
+          filterd_1_y = sum(self.bufferlist_1_y)/20
+          filterd_2_x = sum(self.bufferlist_2_x)/20
+          filterd_2_y = sum(self.bufferlist_2_y)/20
+
           #create current local x,y
-          self.main.filterdPos[0] = (buffer0 + self.main.rawPos[0])/2
-          self.main.filterdPos[1] = (buffer1 + self.main.rawPos[1])/2
-          self.main.filterdPos[2] = (buffer2 + self.main.rawPos[2])/2
+          self.main.filterdPos[0] = (filterd_1_x + filterd_2_x)/2
+          self.main.filterdPos[1] = (filterd_1_y + filterd_2_y)/2
+          self.main.filterdPos[2] = 700
           
-          delx = self.main.rawPos[0] - buffer0
-          dely = self.main.rawPos[1] - buffer1
+          delx = filterd_1_x - filterd_2_x
+          dely = filterd_1_y - filterd_2_y
           
           if (delx == 0):
             delx = 0.01
@@ -85,19 +101,9 @@ class TeamFlyingCircus(threading.Thread):
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
-          self.raw_local_x = cos*buf0 + sin*buf1
-          self.raw_local_y = cos*buf1 - sin*buf0
-          
-          #build average of last 5 local x, y
-          self.bufferlist_x[self.buffercount] = self.raw_local_x
-          self.bufferlist_y[self.buffercount] = self.raw_local_y
-          self.buffercount = self.buffercount +1
-          if(self.buffercount > 5):
-            self.buffercount = 0
-          
-          self.local_x = sum(self.bufferlist_x)/len(self.bufferlist_x)
-          self.local_y = sum(self.bufferlist_y)/len(self.bufferlist_y)
-          
+          self.local_x = cos*buf0 + sin*buf1
+          self.local_y = cos*buf1 - sin*buf0       
+
           print(self.local_x)
           print(self.local_y)
           
@@ -122,7 +128,12 @@ class TeamFlyingCircus(threading.Thread):
           self.bob.write(bytes(('{a}{b}{c}{d}'.format(a=bybuf0, b=bybuf2, c=bybuf1, d=bybuf3)).encode('UTF-8')))
           self.bob.flush()
           #self.ttylock.release()
+
+        self.buffer0 = self.main.rawPos[0]
+        self.buffer1 = self.main.rawPos[1]
+        self.buffer2 = self.main.rawPos[2]
         pass
+
     def onButtonPressed(self, i):
         #welcher Button welche Nummer hat seht Ihr in der glade Datei oder im Eventhandler oder durch Testen
         #print("Button ", i)
