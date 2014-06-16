@@ -26,6 +26,11 @@ class TeamFlyingCircus(threading.Thread):
         self.currentWP = 0
         self.local_x = 0
         self.local_y = 0
+        self.raw_local_x = 0
+        self.raw_local_y = 0
+        self.bufferlist_x = [0, 0, 0, 0, 0, 0]
+        self.bufferlist_y = [0, 0, 0, 0, 0, 0]
+        self.buffercount = 0
         #threading.Thread.__init__(self) #p-initialisierung der vererbten Fähigkeit threading der Klasse Thread.
         #self.ttylock = threading.Lock()
         self.bob = serial.Serial("/dev/ttyUSB1", 115200, 8, 'N', 1, 0.0001)
@@ -59,9 +64,11 @@ class TeamFlyingCircus(threading.Thread):
         buffer2 = self.main.rawPos[2]
         self.main.doppel = self.main.doppel + 1
         send1 = " "
-        self.local_x = 0
-        self.local_y = 0
+        self.raw_local_x = 0
+        self.raw_local_y = 0
+        
         if (self.main.doppel%2==0):
+          #create current local x,y
           self.main.filterdPos[0] = (buffer0 + self.main.rawPos[0])/2
           self.main.filterdPos[1] = (buffer1 + self.main.rawPos[1])/2
           self.main.filterdPos[2] = (buffer2 + self.main.rawPos[2])/2
@@ -78,14 +85,26 @@ class TeamFlyingCircus(threading.Thread):
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
-          self.local_x = cos*buf0 + sin*buf1
-          self.local_y = cos*buf1 - sin*buf0
+          self.raw_local_x = cos*buf0 + sin*buf1
+          self.raw_local_y = cos*buf1 - sin*buf0
+          
+          #build average of last 5 local x, y
+          self.bufferlist_x[self.buffercount] = self.raw_local_x
+          self.bufferlist_y[self.buffercount] = self.raw_local_y
+          self.buffercount = self.buffercount +1
+          if(self.buffercount > 5):
+            self.buffercount = 0
+          
+          self.local_x = sum(self.bufferlist_x)/len(self.bufferlist_x)
+          self.local_y = sum(self.bufferlist_y)/len(self.bufferlist_y)
           
           print(self.local_x)
           print(self.local_y)
           
+          #formatting
           buf0 = self.local_x
           buf1 = self.local_y
+          
           if(buf0 < 0):
             buf0 += 65536
           if(buf1 < 0):
@@ -96,7 +115,7 @@ class TeamFlyingCircus(threading.Thread):
           bybuf1 = chr(int(buf0/256))
           bybuf3 = chr(int(buf1/256))
            
-          if ((self.local_x*self.local_x+self.local_y*self.local_y) < 1000):
+          if ((self.local_x*self.local_x+self.local_y*self.local_y) < 500):
             self.currentWP = self.currentWP + 1
         
           #self.ttylock.acquire()

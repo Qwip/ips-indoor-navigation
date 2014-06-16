@@ -184,11 +184,11 @@ class Main():
         self.waypoints[0][2] = 1500
         self.waypoints[0][3] = 0  #Nummer des Wegpunktes
         self.waypoints[1][0] = 2000
-        self.waypoints[1][1] = 2000
+        self.waypoints[1][1] = 0
         self.waypoints[1][2] = 1500
         self.waypoints[1][3] = 1
-        self.waypoints[2][0] = 1500
-        self.waypoints[2][1] = 1700
+        self.waypoints[2][0] = 2000
+        self.waypoints[2][1] = 2000
         self.waypoints[2][2] = 1500
         self.waypoints[2][3] = 2
         self.waypoints[3][0] = 2000
