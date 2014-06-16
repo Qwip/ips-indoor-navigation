@@ -34,7 +34,7 @@ class Arduino(threading.Thread):
     self.pattern = re.compile(b"t([0-9]{2})([0-9]{10})")
     self.run_ = True
     self.strbuffer = b''
-  #Dauerschleife, Beendet falls self.run_ == False; siehe threading-doku
+    #Dauerschleife, Beendet falls self.run_ == False; siehe threading-doku
   def run(self):
     #i = 0  
     #debug ("Arduino start running")
@@ -81,7 +81,7 @@ class Arduino(threading.Thread):
             distance = deltat * 0.345 #TODO: Temperaturanpassung, aktuell: 22°C
             if distance > 1:
                 stationnr = int(tmp.group(1))
-                if stationnr < 20:
+                if stationnr != 30:
                   millis = int(round(time.time() * 1000))
                   #debug(distance)
                   #debug('Stationnr'+str(self.main.stations[stationnr][3]))

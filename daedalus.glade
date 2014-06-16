@@ -219,7 +219,7 @@ haben. Wenn dem nicht so ist, so schreiben Sie bitte an die Free Software Founda
   </object>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">deadalus - Indoor Positioning System</property>
+    <property name="title" translatable="yes">daedalus - Indoor Positioning System</property>
     <property name="window_position">center</property>
     <signal name="destroy" handler="on_window1_destroy" swapped="no"/>
     <child>
