@@ -27,8 +27,8 @@ class TeamFlyingCircus(threading.Thread):
         self.buffer0 = 0
         self.buffer1 = 0
         self.buffer2 = 0
-        self.local_x = 0
-        self.local_y = 0
+        self.distance = 0
+        self.angle_north = 0
         self.raw_local_x = 0
         self.raw_local_y = 0
         self.bufferlist_1_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -36,6 +36,7 @@ class TeamFlyingCircus(threading.Thread):
         self.bufferlist_2_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_2_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.buffercount = 0
+        self.buff = 10
         #threading.Thread.__init__(self) #p-initialisierung der vererbten Fähigkeit threading der Klasse Thread.
         #self.ttylock = threading.Lock()
         self.bob = serial.Serial("/dev/ttyUSB1", 115200, 8, 'N', 1, 0.0001)
@@ -76,40 +77,32 @@ class TeamFlyingCircus(threading.Thread):
           self.bufferlist_2_x[self.buffercount] = self.main.rawPos[0]
           self.bufferlist_2_y[self.buffercount] = self.main.rawPos[1]
           self.buffercount = self.buffercount + 1
-          if(self.buffercount > 19):
+          if(self.buffercount > self.buff):
             self.buffercount = 0
 
-          filterd_1_x = sum(self.bufferlist_1_x)/20
-          filterd_1_y = sum(self.bufferlist_1_y)/20
-          filterd_2_x = sum(self.bufferlist_2_x)/20
-          filterd_2_y = sum(self.bufferlist_2_y)/20
+          filterd_1_x = sum(self.bufferlist_1_x)/self.buff
+          filterd_1_y = sum(self.bufferlist_1_y)/self.buff
+          filterd_2_x = sum(self.bufferlist_2_x)/self.buff
+          filterd_2_y = sum(self.bufferlist_2_y)/self.buff
 
-          #create current local x,y
+          #create global x,y
           self.main.filterdPos[0] = (filterd_1_x + filterd_2_x)/2
           self.main.filterdPos[1] = (filterd_1_y + filterd_2_y)/2
           self.main.filterdPos[2] = 700
           
-          delx = filterd_1_x - filterd_2_x
-          dely = filterd_1_y - filterd_2_y
-          
-          if (delx == 0):
-            delx = 0.01
-          winkel = math.atan(dely/delx)
-          cos = math.cos(winkel)
-          sin = math.sin(winkel)
-          
+          #create distance and northern angle to next waypoint
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
-          self.local_x = cos*buf0 + sin*buf1
-          self.local_y = cos*buf1 - sin*buf0       
+          self.distance = (buf0**2+buf1**2)**(0.5)
+          self.angle_north = 180 / math.pi * (math.asin((-1)*buf0/self.distance))
 
-          print(self.local_x)
-          print(self.local_y)
+          print(self.distance)
+          print(self.angle_north)
           
           #formatting
-          buf0 = self.local_x
-          buf1 = self.local_y
+          buf0 = self.distance
+          buf1 = self.angle_north
           
           if(buf0 < 0):
             buf0 += 65536
@@ -121,7 +114,7 @@ class TeamFlyingCircus(threading.Thread):
           bybuf1 = chr(int(buf0/256))
           bybuf3 = chr(int(buf1/256))
            
-          if ((self.local_x*self.local_x+self.local_y*self.local_y) < 500):
+          if ((self.local_x**2+self.local_y**2) < 600):
             self.currentWP = self.currentWP + 1
         
           #self.ttylock.acquire()
