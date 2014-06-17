@@ -29,8 +29,6 @@ class TeamFlyingCircus(threading.Thread):
         self.buffer2 = 0
         self.distance = 0
         self.angle_north = 0
-        self.raw_local_x = 0
-        self.raw_local_y = 0
         self.bufferlist_1_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_1_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_2_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -67,10 +65,8 @@ class TeamFlyingCircus(threading.Thread):
         print("yahoooooooooooo")
         self.main.doppel = self.main.doppel + 1
         send1 = " "
-        self.raw_local_x = 0
-        self.raw_local_y = 0
-        
-        if (self.main.doppel%2==0 and (buffer2 + self.main.rawPos[2])/2 > 200):
+
+       if (self.main.doppel%2==0 and (self.buffer2 + self.main.rawPos[2])/2 > 200):
           #filter over 20
           self.bufferlist_1_x[self.buffercount] = self.buffer0
           self.bufferlist_1_y[self.buffercount] = self.buffer1
@@ -94,7 +90,7 @@ class TeamFlyingCircus(threading.Thread):
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
-          self.distance = (buf0**2+buf1**2)**(0.5)
+          self.distance = (buf0**2+buf1**2)**(0.5)/10
           self.angle_north = 180 / math.pi * (math.asin((-1)*buf0/self.distance))
 
           print(self.distance)
@@ -114,7 +110,7 @@ class TeamFlyingCircus(threading.Thread):
           bybuf1 = chr(int(buf0/256))
           bybuf3 = chr(int(buf1/256))
            
-          if ((self.local_x**2+self.local_y**2) < 600):
+          if (self.distance < 30):
             self.currentWP = self.currentWP + 1
         
           #self.ttylock.acquire()
