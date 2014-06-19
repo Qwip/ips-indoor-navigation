@@ -77,6 +77,7 @@ void setup() {
   Mirf.csnPin = 10;
   Mirf.init();
   Mirf.setRADDR((byte *)RFADDR);
+  Mirf.setTADDR((byte *)RFBASE);
   Mirf.payload = 12;
   Mirf.channel = RFCHANNEL;
   Mirf.config();

@@ -7,8 +7,8 @@
 
 // NRF24 settings
 // NRF24 settings
-#define RFADDR "base"
-#define RFBASE "Bloon"
+#define RFBASE "base"
+#define RFADDR "Bloon"
 #define RFCHANNEL 30
 #define PAYLOAD 12
 
@@ -16,20 +16,11 @@
 float waypoint[3] = {0};
 float rec_data[3] = {0};
 */
-
-//REFERENCE: Funkprotokoll |  30  |  0  |Distanz|Distanz|Nordwinkel|Nordwinkel|Sollhoehe|Abwurf|Gondelwinkel|Gondelwinkel|
-//                         |   0  |  1  |   2   |   3   |     4    |      5   |     6   |   7  |      8     |     9      |
-//
-//Nordwinkel:    Winkel zwischen norwärts gerichtetem Vektor und Vektor zum nächsten Wegpunkt
-//Distanz:       absolute Distanz zwischen Gondel und nächstem Wegpunkt
-//Gondelwinkel:  Winkel zwischen norwärts gerichtetem Vektor und Richtungswinkel der Gondel
-
 byte sending[PAYLOAD] = {0};
 byte receiving[PAYLOAD] = {0};
 //checks and states and inputs
 float check1;
 int state = 0;
-int nordwinkel, distanz, gondelwinkel;
 char menu;
 byte count;
 
@@ -43,7 +34,7 @@ byte *recbytes = (byte*)rec_data;
 */
 //===================================//
 
-// send and repeat data until the answer returns (update: ack obsolete, just keep sending)
+// send and repeat data until the answer returns
 // save return data in array rec_data, recdata[0] != 2 signals correct exchange
 void consend(byte data[PAYLOAD])
 {
@@ -60,13 +51,13 @@ void consend(byte data[PAYLOAD])
   //wait for ack for "interval" amount of ms
   //while(receiving[3] == 2 && ((millis() - timer) < interval))
   //{
-  if(Mirf.dataReady())
-  {
-    Mirf.getData(receiving);
-    Serial.println("Received Ack");
-  }
+    if(Mirf.dataReady())
+    {
+      Mirf.getData(receiving);
+      Serial.println("Received Ack");
+    }
   //}
-  ///if no ack, restart transmission
+  //if no ack, restart transmission
   //if(receiving[3] == 2)
   //consend(data);
 }
@@ -98,10 +89,11 @@ void loop()
     case 0: //initialize coordinates
 
       Serial.println("Waehrend des Betriebs sind die folgenden Werte mit 'Enter' einzugeben:");
-      Serial.println("W, S:     Einstellen der Sollhoehe");
-      Serial.println("R, F:     Eingabe von Distanz und Nordwinkel.");
-      Serial.println("Y:        Reset & Return zu diesem Menu");
-      Serial.println("X:        wirft Paket ab");
+      Serial.println("Q, W, E: erhoehen die Werte des linken, mittleren und rechten Motors");
+      Serial.println("A, S, D: senken die Werte des linken, mittleren und rechten Motors");
+      Serial.println("F        setzt alle Motoren auf Null.");
+      Serial.println("R        Return zu diesem Menu");
+      Serial.println("X        wirft Paket ab");
       Serial.println();
       Serial.println("Bitte Startwerte eingeben");
           
@@ -111,57 +103,32 @@ void loop()
       sending[3] = 0;
       sending[4] = 0;
       sending[5] = 0;
-      sending[6] = 100;
-      sending[7] = 0;
+      sending[6] = 0;
+      sending[7] = 100;
       count = 0;
       state = 2;
-      distanz = 0;
-      nordwinkel = 0;
-      gondelwinkel = 0;
       break;
       
-    case 1: //distanz from serial input
+    case 1: //receive data from serial input
       
-      Serial.println("Distanz zum Wegpunkt:");
-      
-      if (Serial.available() > 0) 
+      while(sending[3] == 1)
       {
-        distanz = Serial.parseInt();
-        Serial.print("neue Distanz: ");
-        Serial.println(distanz);
-        Serial.println();
-        
-        if(distanz < 0)
-          distanz = distanz + 65536;
-        
-        sending[3] = distanz & 0xFF;
-        sending[2] = distanz >> 8;
-        
-        state = 2;     
+        while(sending[count]!=1)
+        {
+          count++;
+        }
+        if (Serial.available() > 0) 
+        {
+          sending[count] = Serial.parseInt();
+          Serial.print(count+1);
+          Serial.print(". Wert ist: ");
+          Serial.print(sending[count]);
+          Serial.println(" ");
+          
+        }
       }
       
-      break;
-    
-    case 5: //nordwinkel from serial input
-      
-      Serial.println("Nord-Winkel zum Wegpunkt:");
-      
-      if (Serial.available() > 0) 
-      {
-        nordwinkel = Serial.parseInt();
-        Serial.print("neuer Nord-Winkel: ");
-        Serial.println(nordwinkel);
-        Serial.println();
-        
-        if(nordwinkel < 0)
-          nordwinkel = nordwinkel + 65536;
-        
-        sending[5] = nordwinkel & 0xFF;
-        sending[4] = nordwinkel >> 8;
-        
-        state = 2;     
-      }
-      
+      state = 2;  
       break;
     
     case 2: //communicate
@@ -182,9 +149,9 @@ void loop()
       Serial.print(sending[5]);
       Serial.print(" | ");
       Serial.print(sending[6]);
-      Serial.print(" | ");
+      Serial.print("|");
       Serial.print(sending[7]);
-      Serial.print(" | ");
+      Serial.print("|");
       Serial.print(sending[8]);
       Serial.print(" ");
       Serial.print(sending[9]);
@@ -210,52 +177,80 @@ void loop()
       Serial.println();
       
       
-      //input chars to change values
-      
+      //input r to leave this state and get new coordinates
+      //
       if (Serial.available() > 0)
       {
         menu = Serial.read();
       }
-      switch(menu)
+      if(menu == 'q')
       {
-        case 'w': //Sollhoehe erhoehen
-          sending[3] = sending[6] + 10;
-          break;
-
-        case 's': //Sollhoehe senken
-          sending[3] = sending[6] - 10;
-          break;
-
-        case 'r': //Distanz
-          state = 1;
-          break;
-
-        case 'f': //Nordwinkel
-          state = 5;
-          break;
-
-        case 'x': //Paketabwurf
-          if(sending[7] == 1)
-            sending[7] = 0;
-          else
-            sending[7] = 1;
-          break;
-
-        case 'y': //Reset
-          state = 0;
-          break;
-
-        case 'c': //Clear
-          sending[0] =30;
-          sending[1] =0;
-          sending[2] =0;
-          sending[4] =0;
-          sending[5] =0;
-          sending[6] =100;
-          sending[7] =0;
-          sending[8] =0;
-          break;
+        sending[2] = sending[2] + 10;
       }
+      if(menu == 'a')
+      {
+        sending[2] = sending[2] - 10;
+      }
+      if(menu == 'w')
+      {
+        sending[3] = sending[3] + 10;
+      }
+      if(menu == 's')
+      {
+        sending[3] = sending[3] - 10;
+      }
+      if(menu == 'e')
+      {
+        sending[4] = sending[4] + 10;
+      }
+      if(menu == 'd')
+      {
+        sending[4] = sending[4] - 10;
+      }
+      if(menu == 'r')
+      {
+        sending[5] = sending[5] + 10;
+      }
+      if(menu == 'f')
+      {
+        sending[5] = sending[5] - 10;
+      }
+      if(menu == 't')
+      {
+        sending[6] = sending[6] + 10;
+      }
+      if(menu == 'g')
+      {
+        sending[6] = sending[6] - 10;
+      }
+      if(menu == 'z')
+      {
+        sending[7] = sending[7] + 10;
+      }
+      if(menu == 'h')
+      {
+        sending[7] = sending[7] - 10;
+      }
+      if(menu == 'y')
+      {
+        state = 0;
+      }
+      if(menu == 'x')
+      {
+        sending[4] = 1;
+      }
+      if(menu == 'c')
+      {
+        sending[0] =30;
+        sending[1] =0;
+        sending[2] =0;
+        sending[4] =0;
+        sending[5] =0;
+        sending[6] =0;
+        sending[7] =0;
+        sending[8] =0;
+      }
+      
       break;
      
   }
