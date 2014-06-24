@@ -91,10 +91,14 @@ class TeamFlyingCircus(threading.Thread):
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
           self.distance = (buf0**2+buf1**2)**(0.5)/10
-          self.angle_north = 180 / math.pi * (math.asin((-1)*buf0/self.distance))
+          self.distance = self.distance + 180
+          if(buf1>0):
+            if(math.atan(buf0/buf1)>0):
+              self.angle_north = 180 / math.pi * (math.atan(buf0/buf1))
 
           print(self.distance)
           print(self.angle_north)
+          print()
           
           #formatting
           buf0 = self.distance

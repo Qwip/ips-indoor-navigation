@@ -153,8 +153,7 @@ void loop()
         Serial.println(nordwinkel);
         Serial.println();
         
-        if(nordwinkel < 0)
-          nordwinkel = nordwinkel + 65536;
+        nordwinkel = nordwinkel + 180;
         
         sending[5] = nordwinkel & 0xFF;
         sending[4] = nordwinkel >> 8;
