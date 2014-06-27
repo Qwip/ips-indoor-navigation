@@ -41,6 +41,8 @@ class TeamFlyingCircus(threading.Thread):
         self.bob = serial.Serial("/dev/ttyUSB1", 115200, 8, 'N', 1, 0.0001)
         self.bob.flushInput() #flush input buffer, discarding all its contents
         self.bob.flushOutput()#flush output buffer, aborting current output
+        self.pattern = re.compile(b"X([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})")
+        self.strbuffer = b''
         #Wegfindung: Definition der Wegpunkte. Zu Beachten: Alle Hindernisse müssen als Tore aufgebaut sein ((1,2);(3,4);(5,6)...)
         #wobei die kleinere Zahl den linken Torpfosten darstellt.
         """self.main.waypoints[0][0] = 
@@ -84,6 +86,18 @@ class TeamFlyingCircus(threading.Thread):
         if (self.start_):
             #wegpunktnavigation etc.
             #self.main.arduino.send("TeamFlyingCircus fliegt!\n")
+            while (self.bob.inWaiting() > 0):
+              self.strbuffer = self.strbuffer + self.s.read(self.s.inWaiting())
+              if b'sync' in self.strbuffer:
+                blocks = self.strbuffer.split(b'sync')
+                self.strbuffer = blocks[-1]
+                lines = blocks[-2].split(b'\n')
+                newdeltat = False
+              for line in lines:
+                tmp = self.pattern.search(line)
+                if tmp is not None:
+                  self.main.filterdPos[2] = int(tmp.group(4))
+                  self.main.doppel = int(tmp.group(3))
             pass
         time.sleep(0.005) #schlafen ist gut, um die CPU nicht voll auszulasten
     def onStart(self):
@@ -98,7 +112,7 @@ class TeamFlyingCircus(threading.Thread):
     def onNewPos(self):
         self.main.doppel = self.main.doppel + 1
         send1 = " "
-
+        
         if (self.main.doppel%2==0):# and (self.buffer2 + self.main.rawPos[2])/2 > 200):
           #filter over 20
           self.bufferlist_1_x[self.buffercount] = self.buffer0
@@ -124,7 +138,6 @@ class TeamFlyingCircus(threading.Thread):
           #create global x,y
           self.main.filterdPos[0] = (filterd_1_x + filterd_2_x)/2
           self.main.filterdPos[1] = (filterd_1_y + filterd_2_y)/2
-          self.main.filterdPos[2] = 400
           
           #create distance and wegpktern winkel to next waypoint
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
@@ -139,6 +152,7 @@ class TeamFlyingCircus(threading.Thread):
           print(self.distance)
           print(self.winkel_wegpkt)
           print(self.winkel_gondel)
+          print(self.main.filterdPos[2])
           print(" ")
           
           #formatting

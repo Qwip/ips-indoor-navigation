@@ -42,28 +42,16 @@ void consend(byte data[PAYLOAD])
   Mirf.send(data);
   while(Mirf.isSending()){
   }
-  Serial.println("Sending...");
   for(int i=0;i<12;i++)
   {
     Serial.print(" ");
     Serial.print(data[i]);
   }
-  /*
-  timer = millis();
-  
-  //wait for ack for "interval" amount of ms
-  while(receiving[3] == 2 && ((millis() - timer) < interval))
+
+  if(Mirf.dataReady())
   {
-    if(Mirf.dataReady())
-    {
-      Mirf.getData(receiving);
-      Serial.println("Received Ack");
-    }
+    Mirf.getData(receiving);
   }
-  //if no ack, restart transmission
-  if(receiving[3] == 2)
-    consend(data);
-  */
 }
 
 
@@ -92,13 +80,6 @@ void loop()
   {
     case 0: //initialize coordinates
       
-      /*Serial.println("Waehrend des Betriebs sind die folgenden Werte mit 'Enter' einzugeben:");
-      Serial.println("Q, W, E: erhoehen die Werte des linken, mittleren und rechten Motors");
-      Serial.println("A, S, D: senken die Werte des linken, mittleren und rechten Motors");
-      Serial.println("F        setzt alle Motoren auf Null.");
-      Serial.println("R        Return zu diesem Menu");
-      Serial.println("X        wirft Paket ab");
-      */
       sending[0] = 30;
       sending[1] = 0;
       sending[2] = 0;
@@ -109,45 +90,15 @@ void loop()
       state = 3;
       break;
       
-    /*case 1: //receive data from serial input
-      
-      while(sending[3] == 1)
-      {
-        while(sending[count]!=1)
-        {
-          count++;
-        }
-        if (Serial.available() > 0) 
-        {
-          sending[count] = Serial.parseInt();
-          Serial.print(count+1);
-          Serial.print(". Wert ist: ");
-          Serial.print(sending[count]);
-          Serial.println(" ");
-          
-        }
-      }
-      
-      state = 2;  
-      break;*/
-    
     case 2: //send data
       
-      Serial.println("Data sent:");
-      /*Serial.print(sending[0]);
-      Serial.print(" ");
-      Serial.print(sending[1]);
-      Serial.print(" ");
-      Serial.print(sending[2]);
-      Serial.print(" ");
-      Serial.print(sending[3]);
-      Serial.print(" ");
-      Serial.print(sending[4]);
-      Serial.println();*/
-      
-      
-      //send char and receive answer
       consend(sending);
+      
+      Serial.print("X");
+      for(int i=0; i<10; i++)
+      {
+        Serial.print(receiving[i]);
+      }
       
       state = 3;      
       break;
