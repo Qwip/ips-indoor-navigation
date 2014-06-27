@@ -28,18 +28,52 @@ class TeamFlyingCircus(threading.Thread):
         self.buffer1 = 0
         self.buffer2 = 0
         self.distance = 0
-        self.angle_north = 0
+        self.winkel_wegpkt = 0
+        self.winkel_gondel = 0
         self.bufferlist_1_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_1_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_2_x = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.bufferlist_2_y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.buffercount = 0
-        self.buff = 10
+        self.buff = 3
         #threading.Thread.__init__(self) #p-initialisierung der vererbten Fähigkeit threading der Klasse Thread.
         #self.ttylock = threading.Lock()
         self.bob = serial.Serial("/dev/ttyUSB1", 115200, 8, 'N', 1, 0.0001)
         self.bob.flushInput() #flush input buffer, discarding all its contents
-        self.bob.flushOutput()#flush output buffer, aborting current output 
+        self.bob.flushOutput()#flush output buffer, aborting current output
+        #Wegfindung: Definition der Wegpunkte. Zu Beachten: Alle Hindernisse müssen als Tore aufgebaut sein ((1,2);(3,4);(5,6)...)
+        #wobei die kleinere Zahl den linken Torpfosten darstellt.
+        """self.main.waypoints[0][0] = 
+        self.main.waypoints[0][1] = 
+        self.main.waypoints[1][0] = 
+        self.main.waypoints[1][1] = 
+        self.main.waypoints[2][0] = 
+        self.main.waypoints[2][1] = 
+        self.main.waypoints[3][0] = 
+        self.main.waypoints[3][1] = 
+        self.main.waypoints[4][0] = 
+        self.main.waypoints[4][1] = 
+        self.main.waypoints[5][0] = 
+        self.main.waypoints[5][1] = 
+        self.main.waypoints[6][0] = 
+        self.main.waypoints[6][1] = 
+        self.main.waypoints[7][0] = 
+        self.main.waypoints[7][1] = 
+        self.main.waypoints[8][0] = 
+        self.main.waypoints[8][1] = 
+        self.main.waypoints[9][0] = 
+        self.main.waypoints[9][1] = 
+        self.main.waypoints[10][0] = 
+        self.main.waypoints[10][1] = 
+        self.main.waypoints[11][0] = 
+        self.main.waypoints[11][1] = 
+        self.main.waypoints[12][0] = 
+        self.main.waypoints[12][1] = 
+        self.main.waypoints[13][0] = 
+        self.main.waypoints[13][1] = 
+        self.main.waypoints[14][0] = 
+        self.main.waypoints[14][1] = """
+        
     def run(self):
         #i=0
         while(self.run_):
@@ -62,11 +96,10 @@ class TeamFlyingCircus(threading.Thread):
         # reset etc.
         pass
     def onNewPos(self):
-        print("yahoooooooooooo")
         self.main.doppel = self.main.doppel + 1
         send1 = " "
 
-       if (self.main.doppel%2==0 and (self.buffer2 + self.main.rawPos[2])/2 > 200):
+        if (self.main.doppel%2==0):# and (self.buffer2 + self.main.rawPos[2])/2 > 200):
           #filter over 20
           self.bufferlist_1_x[self.buffercount] = self.buffer0
           self.bufferlist_1_y[self.buffercount] = self.buffer1
@@ -80,45 +113,58 @@ class TeamFlyingCircus(threading.Thread):
           filterd_1_y = sum(self.bufferlist_1_y)/self.buff
           filterd_2_x = sum(self.bufferlist_2_x)/self.buff
           filterd_2_y = sum(self.bufferlist_2_y)/self.buff
-
+          
+          #Gondelwinkel
+          winkx = filterd_1_x - filterd_2_x
+          winky = filterd_1_y - filterd_2_y
+          if(winky!=0):
+            if(math.atan(winkx/winky)!=0):
+              self.winkel_gondel = 180/math.pi*(math.atan(winkx/winky))
+          
           #create global x,y
           self.main.filterdPos[0] = (filterd_1_x + filterd_2_x)/2
           self.main.filterdPos[1] = (filterd_1_y + filterd_2_y)/2
-          self.main.filterdPos[2] = 700
+          self.main.filterdPos[2] = 400
           
-          #create distance and northern angle to next waypoint
+          #create distance and wegpktern winkel to next waypoint
           buf0 = self.main.waypoints[self.currentWP][0] - self.main.filterdPos[0]
           buf1 = self.main.waypoints[self.currentWP][1] - self.main.filterdPos[1]
           
           self.distance = (buf0**2+buf1**2)**(0.5)/10
           self.distance = self.distance + 180
-          if(buf1>0):
-            if(math.atan(buf0/buf1)>0):
-              self.angle_north = 180 / math.pi * (math.atan(buf0/buf1))
+          if(buf1!=0):
+            if(math.atan(buf0/buf1)!=0):
+              self.winkel_wegpkt = 180 / math.pi * (math.atan(buf0/buf1))
 
           print(self.distance)
-          print(self.angle_north)
-          print()
+          print(self.winkel_wegpkt)
+          print(self.winkel_gondel)
+          print(" ")
           
           #formatting
           buf0 = self.distance
-          buf1 = self.angle_north
+          buf1 = self.winkel_wegpkt
+          buf2 = self.winkel_gondel
           
           if(buf0 < 0):
             buf0 += 65536
           if(buf1 < 0):
             buf1 += 65536
+          if(buf2 < 0):
+            buf2 += 65536
           
           bybuf0 = chr(int(buf0%256))
           bybuf2 = chr(int(buf1%256))
           bybuf1 = chr(int(buf0/256))
           bybuf3 = chr(int(buf1/256))
+          bybuf4 = chr(int(buf2%256))
+          bybuf5 = chr(int(buf2/256))
            
           if (self.distance < 30):
             self.currentWP = self.currentWP + 1
         
           #self.ttylock.acquire()
-          self.bob.write(bytes(('{a}{b}{c}{d}'.format(a=bybuf0, b=bybuf2, c=bybuf1, d=bybuf3)).encode('UTF-8')))
+          self.bob.write(bytes(('{a}{b}{c}{d}{e}{f}'.format(a=bybuf0, b=bybuf2, c=bybuf1, d=bybuf3, e=bybuf4, f=bybuf5)).encode('UTF-8')))
           self.bob.flush()
           #self.ttylock.release()
 

@@ -165,10 +165,12 @@ void loop()
     
     case 4: //read serial
       
-      if(Serial.available() > 3) 
+      if(Serial.available() > 5) 
       {
         for(int n=0; n<4; n++)
           sending[n+2]= Serial.read();
+        sending[8] = Serial.read();
+        sending[9] = Serial.read();
       }
       
       state = 2;
