@@ -42,11 +42,6 @@ void consend(byte data[PAYLOAD])
   Mirf.send(data);
   while(Mirf.isSending()){
   }
-  for(int i=0;i<12;i++)
-  {
-    Serial.print(" ");
-    Serial.print(data[i]);
-  }
 
   if(Mirf.dataReady())
   {
@@ -98,6 +93,7 @@ void loop()
       for(int i=0; i<10; i++)
       {
         Serial.print(receiving[i]);
+        Serial.print("Q");
       }
       
       state = 3;      
@@ -112,6 +108,8 @@ void loop()
       {
           state = 4;
       }
+      state = 2;
+      delay(50);
       break;
     
     case 4: //read serial
