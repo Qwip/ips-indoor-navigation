@@ -47,6 +47,7 @@ void consend(byte data[PAYLOAD])
   {
     Mirf.getData(receiving);
   }
+  delay(50);
 }
 
 
@@ -81,6 +82,7 @@ void loop()
       sending[3] = 0;
       sending[4] = 0;
       sending[5] = 0;
+      sending[6] = 100;
       count = 0;
       state = 3;
       break;

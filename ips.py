@@ -174,8 +174,8 @@ class Main():
         self.heading = 0.0
         
         # stations[#stationsnummer]: [0-2] = x,y,z; [3] = radius in mm; [4] = letzte Aktivität
-        self.stations = [[0 for col in range(5)] for row in range(11)]
-        self.waypoints = [[0 for col in range(5)] for row in range(5)]
+        self.stations = [[0 for col in range(5)] for row in range(20)]
+        self.waypoints = [[0 for col in range(5)] for row in range(10)]
         
         #Angabe der Wegpunkte kann über Gui bearbeitet werden
         
@@ -366,8 +366,8 @@ class Main():
                     i += 1
                     cstations[i][0] = c_double(station[0])
                     cstations[i][1] = c_double(station[1])
-                    cstations[i][2] = c_double(station[2])
-                    cradii[i] = c_double(station[3])
+                    cstations[i][2] = c_double(0)
+                    cradii[i] = c_double(self.team.filterdstations[self.doppel][i])
             x = c_double()
             y = c_double()
             z = c_double()

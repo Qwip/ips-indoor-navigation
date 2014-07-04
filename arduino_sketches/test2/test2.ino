@@ -95,9 +95,9 @@ void loop(){
   //if(posz < 20) posz = 20;
   if(abs(vz) > 80) vz = 80 * vz/abs(vz);
   
-  posx = posx + vx;
-  posy = posy + vy;
-  posz = posz + vz;
+  posx = posx + vx/2;
+  posy = posy + vy/2;
+  posz = posz + vz/2;
   
   
   if(k%53 == 0) Serial.println("Bodenstation 4 meldet schwachen Akku!");

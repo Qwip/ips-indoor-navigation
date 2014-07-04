@@ -103,7 +103,7 @@ class Arduino(threading.Thread):
             pass
         ##    
         if newdeltat:
-          self.main.clib_multilat()
+          #self.main.clib_multilat()
           self.main.eventhandler.onNewPos()
           #debug("NewPos")
         ##   
