@@ -206,41 +206,44 @@ class Main():
         
         #Angabe der Positionen der Stationen; TODO: soll in finaler Version wegfallen, da über GUI eingestellt
         
-        self.stations[0][0] = 0
-        self.stations[0][1] = 0
+        self.stations[0][0] = 3000
+        self.stations[0][1] = 3000
         self.stations[0][2] = 0
-        self.stations[1][0] = 1000#1500#0
-        self.stations[1][1] = 0#3000#0
+        self.stations[1][0] = 3000#1500#0
+        self.stations[1][1] = 3000#3000#0
         self.stations[1][2] = 0#0#500#
-        self.stations[2][0] = 1000
-        self.stations[2][1] = 1000
-        self.stations[2][2] = 1000
-        self.stations[3][0] = 0#1000
-        self.stations[3][1] = 1000#3000#1000
+        self.stations[2][0] = 0
+        self.stations[2][1] = 0
+        self.stations[2][2] = 0
+        self.stations[3][0] = 3000#1000
+        self.stations[3][1] = 3000#3000#1000
         self.stations[3][2] = 0#0#1000
-        self.stations[4][0] = -1000#6000#0#0
-        self.stations[4][1] = 1000#3000#1000
+        self.stations[4][0] = 0#6000#0#0
+        self.stations[4][1] = 0#3000#1000
         self.stations[4][2] = 1000#500#0
-        self.stations[5][0] = -1000#450#0#-1000
-        self.stations[5][1] = 0#2000#1000
+        self.stations[5][0] = 3000#450#0#-1000
+        self.stations[5][1] = 3000#2000#1000
         self.stations[5][2] = 0#0#500#1000
-        self.stations[6][0] = -1000#2000 #-1000
-        self.stations[6][1] = -1000#2000#0
+        self.stations[6][0] = 3000#2000 #-1000
+        self.stations[6][1] = 3000#2000#0
         self.stations[6][2] = 1000#0
         self.stations[7][0] = 0#-1000
-        self.stations[7][1] = -1000#-1000
+        self.stations[7][1] = 2000#-1000
         self.stations[7][2] = 0#1000
-        self.stations[8][0] = 1000#2000#1000#0
-        self.stations[8][1] = -1000#6000#0#1000#-1000
+        self.stations[8][0] = 3000#2000#1000#0
+        self.stations[8][1] = 3000#6000#0#1000#-1000
         self.stations[8][2] = 0#0
-        self.stations[9][0] = 0#3000#1000#1000
+        self.stations[9][0] = 2000#3000#1000#1000
         self.stations[9][1] = 0#3000#1000#-1000
-        self.stations[9][2] = 200#450#1000
-        self.stations[10][0] = 0
-        self.stations[10][1] = 0
+        self.stations[9][2] = 0#450#1000
+        self.stations[10][0] = 3000
+        self.stations[10][1] = 3000
         self.stations[10][2] = 0
+        self.stations[11][0] = 2000
+        self.stations[11][1] = 2000
+        self.stations[11][2] = 0
         
-        #Simulationspositionen:
+        """#Simulationspositionen:
         self.stations[0][0] = 0
         self.stations[0][1] = 0
         self.stations[0][2] = 0
@@ -273,7 +276,7 @@ class Main():
         self.stations[9][2] = 1000
         self.stations[10][0] = 0
         self.stations[10][1] = 0
-        self.stations[10][2] = 0
+        self.stations[10][2] = 0"""
         
         # initialisiere Variablen, werden von initfenster beschrieben
         self.team = 0
