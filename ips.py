@@ -243,6 +243,19 @@ class Main():
         self.stations[11][1] = 2000
         self.stations[11][2] = 0
         
+        self.stations[2][0] = 0
+        self.stations[2][1] = 1000
+        self.stations[2][2] = 0
+        self.stations[4][0] = 0#6000#0#0
+        self.stations[4][1] = 0#3000#1000
+        self.stations[4][2] = 0#500#0
+        self.stations[7][0] = 1000#-1000
+        self.stations[7][1] = 1000#-1000
+        self.stations[7][2] = 0#1000
+        self.stations[9][0] = 1000#3000#1000#1000
+        self.stations[9][1] = 0#3000#1000#-1000
+        self.stations[9][2] = 0#450#1000
+        
         """#Simulationspositionen:
         self.stations[0][0] = 0
         self.stations[0][1] = 0
@@ -369,7 +382,7 @@ class Main():
                     i += 1
                     cstations[i][0] = c_double(station[0])
                     cstations[i][1] = c_double(station[1])
-                    cstations[i][2] = c_double(0)
+                    cstations[i][2] = c_double(station[2])
                     cradii[i] = c_double(self.team.filterdstations[self.doppel][i])
             x = c_double()
             y = c_double()

@@ -84,6 +84,18 @@ class TeamFlyingCircus(threading.Thread):
     def loop(self):
         if (self.start_):
           #Kommunikation mit Gondel: Empfangen der Höhendaten/Doppeltrigger
+          while (self.bob.inWaiting() > 0):
+            self.strbuffer = self.strbuffer + self.bob.read(self.bob.inWaiting())
+            received = 'DERP'
+            if b'X' in self.strbuffer:
+              blocks = self.strbuffer.split(b'X')
+              for block in blocks:
+                received = block.split(b'Q')
+                print(received)
+              if(len(received) > 6):
+                self.main.filterdPos[2] = int(received[3])
+                self.main.doppel = int(received[2])
+
             pass
         time.sleep(0.005) #schlafen ist gut, um die CPU nicht voll auszulasten
     def onStart(self):
@@ -96,8 +108,6 @@ class TeamFlyingCircus(threading.Thread):
         # reset etc.
         pass
     def onNewPos(self):
-        #Anpassen der Rohdaten an 2dim multilat, Speichern in bufferlist, Mittelung über ca. 1 sec. Aufruf von multilat in filterdstations.
-        #filterdstations zweizeilig, auswahl durch self.main.doppel
         while (self.bob.inWaiting() > 0):
           self.strbuffer = self.strbuffer + self.bob.read(self.bob.inWaiting())
           received = 'DERP'
@@ -110,9 +120,11 @@ class TeamFlyingCircus(threading.Thread):
               self.main.filterdPos[2] = int(received[3])
               self.main.doppel = int(received[2])
 
+        #Anpassen der Rohdaten an 2dim multilat, Speichern in bufferlist, Mittelung über ca. 1 sec. Aufruf von multilat in filterdstations.
+        #filterdstations zweizeilig, auswahl durch self.main.doppel
         for count in range(20):
           self.bufferlist[count][self.buffercount]=(self.main.stations[count][3])#**2-self.main.filterdPos[2]**2)**(0.5)
-          self.filterdstations[self.main.doppel][count] = sum(self.bufferlist[count])/(self.buff*2-1)
+          self.filterdstations[self.main.doppel][count] = sum(self.bufferlist[count])/(self.buff-1)
 
         self.buffercount = self.buffercount + 1
         if(self.buffercount > self.buff*2-1):
